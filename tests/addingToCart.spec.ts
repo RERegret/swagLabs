@@ -35,3 +35,13 @@ test('Purchase flow', async ({ page }) => {
     await expect(page.locator('.complete-header')).toHaveText('Thank you for your order!');
 
 })
+
+test('Visual glitches', async ({ page }) => {
+    await page.goto('https://www.saucedemo.com/');
+    await page.getByRole('textbox', { name: 'Username' }).fill('visual_user');
+    await page.getByRole('textbox', { name: 'Password' }).fill('secret_sauce');
+    await page.getByRole('button', { name: 'Login' }).click();
+    await expect(page.locator('.title')).toHaveText('Products');
+    await expect(page.locator('.shopping_cart_container')).toBeVisible();
+    await expect(page).not.toHaveScreenshot('tests/screenshots/visual_glitches.png')
+});
