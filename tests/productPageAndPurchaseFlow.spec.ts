@@ -68,3 +68,34 @@ test('Visual glitches', async ({ page }) => {
     await expect(page).not.toHaveScreenshot('visual_glitches_home.png');
 
 });
+
+test('Order items', async ({ page }) => {
+    await page.goto('https://www.saucedemo.com/');
+    await page.getByRole('textbox', { name: 'Username' }).fill('standard_user');
+    await page.getByRole('textbox', { name: 'Password' }).fill('secret_sauce');
+    await page.getByRole('button', { name: 'Login' }).click();
+    await expect(page.locator('.title')).toHaveText('Products');
+
+    let products = await page.locator('.inventory_item');
+    const azSortedOrder = await products.evaluateAll(items => items.map(item => item.querySelector('.inventory_item_name')?.textContent));
+
+    await page.locator('.product_sort_container').click();
+    await page.locator('.product_sort_container').selectOption('za');
+    products = await page.locator('.inventory_item');
+    const zaSortedOrder = await products.evaluateAll(items => items.map(item => item.querySelector('.inventory_item_name')?.textContent));
+
+    await expect(zaSortedOrder).toEqual(azSortedOrder?.slice().reverse());
+
+    await page.locator('.product_sort_container').click();
+    await page.locator('.product_sort_container').selectOption('lohi');
+    products = await page.locator('.inventory_item');
+    const lohiPrices = await products.evaluateAll(items => items.map(item => parseFloat(item.querySelector('.inventory_item_price')?.textContent?.replace('$', '') || '0')));
+    expect(lohiPrices).toEqual([...lohiPrices].sort((a, b) => a - b));
+    await page.locator('.product_sort_container').click();
+
+    await page.locator('.product_sort_container').selectOption('hilo');
+    products = await page.locator('.inventory_item');
+    const hiloPrices = await products.evaluateAll(items => items.map(item => parseFloat(item.querySelector('.inventory_item_price')?.textContent?.replace('$', '') || '0')));
+    expect(hiloPrices).toEqual([...hiloPrices].sort((a, b) => b - a));
+    expect(hiloPrices).toEqual(lohiPrices.slice().reverse());
+})
