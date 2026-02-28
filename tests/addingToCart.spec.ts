@@ -43,5 +43,9 @@ test('Visual glitches', async ({ page }) => {
     await page.getByRole('button', { name: 'Login' }).click();
     await expect(page.locator('.title')).toHaveText('Products');
     await expect(page.locator('.shopping_cart_container')).toBeVisible();
-    await expect(page).not.toHaveScreenshot('tests/screenshots/visual_glitches.png')
+    await expect(page).not.toHaveScreenshot('visual_glitches_home.png')
+    await page.getByRole('button', {name: 'Add to cart'}).first().click();
+    await page.locator('.shopping_cart_container').click();
+    await expect(page.getByRole('button', {name: 'Checkout'})).toBeVisible();
+    await expect(page).not.toHaveScreenshot('visual_glitches_checkout.png')
 });
