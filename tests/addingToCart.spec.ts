@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import {faker} from '@faker-js/faker';
+import { faker } from '@faker-js/faker';
 
 test('Purchase flow', async ({ page }) => {
 
@@ -33,6 +33,8 @@ test('Purchase flow', async ({ page }) => {
     await page.getByRole('button', { name: 'Finish' }).click();
     await expect(page.locator('.title')).toHaveText('Checkout: Complete!');
     await expect(page.locator('.complete-header')).toHaveText('Thank you for your order!');
+    await page.getByRole('button', { name: 'Back Home' }).click();
+    await expect(page.locator('.title')).toHaveText('Products');
 
 })
 
@@ -44,8 +46,25 @@ test('Visual glitches', async ({ page }) => {
     await expect(page.locator('.title')).toHaveText('Products');
     await expect(page.locator('.shopping_cart_container')).toBeVisible();
     await expect(page).not.toHaveScreenshot('visual_glitches_home.png')
-    await page.getByRole('button', {name: 'Add to cart'}).first().click();
+    await page.getByRole('button', { name: 'Add to cart' }).first().click();
     await page.locator('.shopping_cart_container').click();
-    await expect(page.getByRole('button', {name: 'Checkout'})).toBeVisible();
-    await expect(page).not.toHaveScreenshot('visual_glitches_checkout.png')
+    await expect(page.getByRole('button', { name: 'Checkout' })).toBeVisible();
+    await expect(page).not.toHaveScreenshot('visual_glitches_checkout.png');
+    await page.getByRole('button', { name: 'Checkout' }).click();
+    await expect(page.locator('.title')).toHaveText('Checkout: Your Information');
+    await expect(page).not.toHaveScreenshot('visual_glitches_checkout_info.png');
+    await page.getByRole('textbox', { name: 'First Name' }).fill(faker.person.firstName());
+    await page.getByRole('textbox', { name: 'Last Name' }).fill(faker.person.lastName());
+    await page.getByRole('textbox', { name: 'Postal Code' }).fill(faker.location.zipCode());
+    await page.getByRole('button', { name: 'Continue' }).click();
+    await expect(page.locator('.title')).toHaveText('Checkout: Overview');
+    await expect(page).not.toHaveScreenshot('visual_glitches_checkout_overview.png');
+    await page.getByRole('button', { name: 'Finish' }).click();
+    await expect(page.locator('.title')).toHaveText('Checkout: Complete!');
+    await expect(page.locator('.complete-header')).toHaveText('Thank you for your order!');
+    await expect(page).not.toHaveScreenshot('visual_glitches_checkout_complete.png');
+    await page.getByRole('button', { name: 'Back Home' }).click();
+    await expect(page.locator('.title')).toHaveText('Products');
+    await expect(page).not.toHaveScreenshot('visual_glitches_home.png');
+
 });
