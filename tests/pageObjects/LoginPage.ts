@@ -1,4 +1,4 @@
-import { Page, Locator } from '@playwright/test';
+import { Page, Locator, expect } from '@playwright/test';
 
 export class LoginPage {
   readonly page: Page;
@@ -33,6 +33,20 @@ export class LoginPage {
     await this.loginButton.click();
   }
 
+  async emptyLogin() {
+    await this.loginButton.click();
+  }
+
+  async userNameOnlyLogin(username: string) {
+    await this.username.fill(username);
+    await this.loginButton.click();
+  }
+
+  async passwordOnlyLogin(password: string) {
+    await this.password.fill(password);
+    await this.loginButton.click();
+  }
+
   async logout() {
     await this.menuButton.click();
     await this.logoutLink.click();
@@ -43,7 +57,56 @@ export class LoginPage {
     await this.password.fill('');
   }
 
-  getErrorMessage() {
-    return this.errorMessage;
+  async successfulLogin() {
+    await this.login('standard_user', 'secret_sauce');
+    await expect(this.title).toHaveText('Products');
+    await this.logout();
+    await expect(this.username).toBeEmpty();
+    await expect(this.password).toBeEmpty();
+    await expect(this.loginButton).toBeVisible();
+  }
+
+  async failedLogin() {
+    await this.login('problem_user', 'secretNotSauce');
+
+    await expect(this.errorMessage).toBeVisible();
+    await expect(this.errorMessage).toHaveText('Epic sadface: Username and password do not match any user in this service');
+    await expect(this.errorButton).toBeVisible();
+    await this.errorButton.click();
+    await expect(this.errorMessage).toBeHidden();
+
+  }
+
+  async lockedOut() {
+    await this.login('locked_out_user', 'secret_sauce');
+    await expect(this.errorMessage).toBeVisible();
+    await expect(this.errorMessage).toHaveText('Epic sadface: Sorry, this user has been locked out.');
+    await expect(this.errorButton).toBeVisible();
+    await this.errorButton.click();
+    await expect(this.errorMessage).toBeHidden();
+  }
+
+  async missingCredentials() {
+
+    await this.emptyLogin();
+    await expect(this.errorMessage).toBeVisible();
+    await expect(this.errorMessage).toHaveText('Epic sadface: Username is required');
+    await expect(this.errorButton).toBeVisible();
+    await this.errorButton.click();
+    await expect(this.errorMessage).toBeHidden();
+
+    await this.userNameOnlyLogin('locked_out_user');
+    await expect(this.errorMessage).toBeVisible();
+    await expect(this.errorMessage).toHaveText('Epic sadface: Password is required');
+    await expect(this.errorButton).toBeVisible();
+    await this.errorButton.click();
+    await expect(this.errorMessage).toBeHidden();
+    await this.clearCredentials();
+    await this.passwordOnlyLogin('secret_sauce');
+    await expect(this.errorMessage).toBeVisible();
+    await expect(this.errorMessage).toHaveText('Epic sadface: Username is required');
+    await expect(this.errorButton).toBeVisible();
+    await this.errorButton.click();
+    await expect(this.errorMessage).toBeHidden();
   }
 }
