@@ -39,6 +39,7 @@ test('Purchase flow', async ({ page }) => {
 })
 
 test('Visual glitches', async ({ page }) => {
+    // If I need screenshots from the "happy" path, I should switch logging in to standard user for one runtime, while switching all comparisons to "expect to have screenshot" instead of "expect to not have"
     await page.goto('https://www.saucedemo.com/');
     await page.getByRole('textbox', { name: 'Username' }).fill('visual_user');
     await page.getByRole('textbox', { name: 'Password' }).fill('secret_sauce');
